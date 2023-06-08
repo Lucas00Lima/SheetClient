@@ -13,5 +13,7 @@
             "username": "root",
             "password": "@soma+"
         }
-    ]
+    ],
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.configuration.updateBuildConfiguration": "automatic"
 }
