@@ -3,13 +3,19 @@ package com.example;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import org.apache.poi.ss.usermodel.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import com.mysql.cj.jdbc.DatabaseMetaData;
 
 public class Main {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         /*
          * JFileChooser fileChooser = new JFileChooser();
          * int result = fileChooser.showOpenDialog(null);
@@ -32,7 +38,28 @@ public class Main {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter dataFormatter = new DataFormatter();
             StringBuilder insertQuery = new StringBuilder(
-                    "INSERT INTO " + table + " VALUES (name, cell_phone, cell_phone2, email)");
+                    "INSERT INTO " + table + " VALUES (name,type1,cell_phone,cell_phone2,email,id_doc_number2,id_doc_number3,id_doc_number4,)");
+            StringBuilder valuePlaceholders =  new StringBuilder(" VALUES (?,?,?,?,?,?,?,?)");
+            List<String> defaultValues = new ArrayList<>();
+            DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+            ResultSet resultSet = metaData.getColumns(null, null, table, null);
+            int totalColumnsInDataBase = 6;
+
+            while (resultSet.next()) {
+                String columnName = resultSet.getString("COLUMN_NAME");
+                if (!columnName.equals("name") && !columnName.equals("type1") && !columnName.equals("cell_phone") 
+                && !columnName.equals("cell_phone2") && !columnName.equals("email") 
+                && !columnName.equals("id_doc_number2") && !columnName.equals("id_doc_number3") && !columnName.equals("id_doc_number4")){;
+                    if (totalColumnsInDataBase > 0) {
+                        insertQuery.append(",");
+                        valuePlaceholders.append(",");
+                    }
+                    insertQuery.append(columnName);
+                    valuePlaceholders.append("?");
+                    defaultValues.add(defaultValue);
+                    totalColumnsInDataBase++;
+                }   
+            }
             System.out.println(insertQuery);
         } catch (Exception e) {
             e.printStackTrace();
