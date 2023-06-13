@@ -130,7 +130,7 @@ public class Main {
 				System.out.println("Sexo " + genderValue);
 				System.out.println("Email " + emailValue);
 				System.out.println("----------------------------");
-			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
