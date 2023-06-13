@@ -47,12 +47,21 @@ public class Main {
 			Sheet sheet = workbook.getSheetAt(0);
 			DataFormatter dataFormatter = new DataFormatter();
 			StringBuilder insertQuery = new StringBuilder("INSERT INTO " + table
+<<<<<<< HEAD
 					+ " (name, type1, id_doc_number2, id_doc_number3, id_doc_number4, cell_phone, cell_phone2, gender, email");
 			StringBuilder valuePlaceholders = new StringBuilder(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?");
 			List<String> defaultValues = new ArrayList<>();
 			DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
 			ResultSet resultSet = metaData.getColumns(null, null, table, null);
 			int totalColumnsInDataBase = 9;
+=======
+					+ " VALUES (name,type1,id_doc_number2,id_doc_number3,id_doc_number4,cell_phone,cell_phone2,gender,email)");
+			StringBuilder valuePlaceholders = new StringBuilder(" VALUES (?,?,?,?,?,?,?,?,?)");
+			List<String> defaultValues = new ArrayList<>();
+			DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+			ResultSet resultSet = metaData.getColumns(null, null, table, null);
+			int totalColumnsInDataBase = 6;
+>>>>>>> bfb74d01fa079f2f8e49257d4ffdfed80e820825
 
 			while (resultSet.next()) {
 				String columnName = resultSet.getString("COLUMN_NAME");
@@ -87,8 +96,13 @@ public class Main {
 				Cell cell_phone2 = row.getCell(6);
 				Cell gender = row.getCell(7);
 				Cell email = row.getCell(8);
+<<<<<<< HEAD
 
 
+=======
+				
+				
+>>>>>>> bfb74d01fa079f2f8e49257d4ffdfed80e820825
 				String nameValue = dataFormatter.formatCellValue(name);
 				String type1Value = dataFormatter.formatCellValue(typeDoc);
 				String numberDocValue = dataFormatter.formatCellValue(numberDoc);
@@ -98,6 +112,7 @@ public class Main {
 				String cell_phone2Value = dataFormatter.formatCellValue(cell_phone2);
 				String genderValue = dataFormatter.formatCellValue(gender);
 				String emailValue = dataFormatter.formatCellValue(email);
+<<<<<<< HEAD
 				Integer typeResult;
 				  if (type1Value.equals("CPF")) { typeResult = 1;
 
@@ -135,6 +150,25 @@ public class Main {
 				 * emailValue); System.out.println("----------------------------");
 				 */
 			}
+=======
+								
+				Integer typeResult;
+				/*
+				 * if (type1Value.equals("CPF")) { typeResult = 1;
+				 * 
+				 * } else { typeResult = 2; }
+				 */
+				System.out.println("TA FUNCIONANDO!!" + nameValue);
+				System.out.println("Olha aqui a porra do type " + type1Value);
+				System.out.println("CPF ou CNPJ " + numberDocValue);
+				System.out.println("RG ou IE " + numberDoc1Value);				
+				System.out.println("Celular " + cell_phoneValue);
+				System.out.println("Segundo Celular " + cell_phone2Value);
+				System.out.println("Sexo " + genderValue);
+				System.out.println("Email " + emailValue);
+				System.out.println("----------------------------");
+			}		
+>>>>>>> bfb74d01fa079f2f8e49257d4ffdfed80e820825
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
