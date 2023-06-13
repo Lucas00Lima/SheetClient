@@ -53,7 +53,6 @@ public class Main {
 			DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
 			ResultSet resultSet = metaData.getColumns(null, null, table, null);
 			int totalColumnsInDataBase = 9;
-
 			while (resultSet.next()) {
 				String columnName = resultSet.getString("COLUMN_NAME");
 				if (!columnName.equals("name") && !columnName.equals("type1") && !columnName.equals("id_doc_number2")
@@ -87,8 +86,6 @@ public class Main {
 				Cell cell_phone2 = row.getCell(6);
 				Cell gender = row.getCell(7);
 				Cell email = row.getCell(8);
-
-
 				String nameValue = dataFormatter.formatCellValue(name);
 				String type1Value = dataFormatter.formatCellValue(typeDoc);
 				String numberDocValue = dataFormatter.formatCellValue(numberDoc);
@@ -124,16 +121,15 @@ public class Main {
 			    //Inserir a data de nascimento
 				preparedStatement.execute();
 				preparedStatement.close();
-				/*
-				 * System.out.println("TA FUNCIONANDO!!" + nameValue);
-				 * System.out.println("Olha aqui a porra do type " + type1Value);
-				 * System.out.println("CPF ou CNPJ " + numberDocValue);
-				 * System.out.println("RG ou IE " + numberDoc1Value);
-				 * System.out.println("Celular " + cell_phoneValue);
-				 * System.out.println("Segundo Celular " + cell_phone2Value);
-				 * System.out.println("Sexo " + genderValue); System.out.println("Email " +
-				 * emailValue); System.out.println("----------------------------");
-				 */
+				System.out.println("TA FUNCIONANDO!!" + nameValue);
+				System.out.println("Olha aqui a porra do type " + type1Value);
+				System.out.println("CPF ou CNPJ " + numberDocValue);
+				System.out.println("RG ou IE " + numberDoc1Value);
+				System.out.println("Celular " + cell_phoneValue);
+				System.out.println("Segundo Celular " + cell_phone2Value);
+				System.out.println("Sexo " + genderValue);
+				System.out.println("Email " + emailValue);
+				System.out.println("----------------------------");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
