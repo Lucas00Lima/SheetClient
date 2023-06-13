@@ -2,17 +2,17 @@ package com.example;
 
 import java.io.FileInputStream;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-import com.mysql.cj.jdbc.DatabaseMetaData;
 
 public class Main {
     public static void main(String[] args) {
@@ -25,7 +25,7 @@ public class Main {
          * JOptionPane.showMessageDialog(null, "Arquivo Selecionado" + filePath);
          * }
          */
-        String filePath = "C:\\Users\\lukin\\OneDrive\\Área de Trabalho\\Nova pasta\\Clientedefinitiva.xlsx";
+        String filePath = "C:\\Users\\lukin\\OneDrive\\Área de Trabalho\\planilha\\cliente.xlsx";
         String username = "root"; /* JOptionPane.showInputDialog("Insira o Usuario do DB"); */
         String password = "@soma+"; /* JOptionPane.showInputDialog("Insira a senha do DB"); */
         String db = "db00"; /* JOptionPane.showInputDialog("Insira o banco que deseja fazer a Query"); */
@@ -38,7 +38,7 @@ public class Main {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter dataFormatter = new DataFormatter();
             StringBuilder insertQuery = new StringBuilder(
-                    "INSERT INTO " + table + " VALUES (name,type1,cell_phone,cell_phone2,email,id_doc_number2,id_doc_number3,id_doc_number4,)");
+                    "INSERT INTO " + table + " VALUES (name,type1,cell_phone,cell_phone2,email,id_doc_number2,id_doc_number3,id_doc_number4)");
             StringBuilder valuePlaceholders =  new StringBuilder(" VALUES (?,?,?,?,?,?,?,?)");
             List<String> defaultValues = new ArrayList<>();
             DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
@@ -60,7 +60,17 @@ public class Main {
                     totalColumnsInDataBase++;
                 }   
             }
-            System.out.println(insertQuery);
+            resultSet.close();
+            insertQuery.append(")");
+            valuePlaceholders.append(")");
+            insertQuery.append(valuePlaceholders);
+            int rowIndex;
+            int totalLinhasInseridas = 0;
+            for (rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+            	Row row = sheet.getRow(rowIndex);
+            	//Seta cada celula que vou pegar da planilha
+            }
+            System.out.println("TA FUNCIONANDO!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
