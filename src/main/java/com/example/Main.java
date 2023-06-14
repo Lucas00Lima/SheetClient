@@ -3,9 +3,12 @@ package com.example;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +40,9 @@ public class Main {
 		String filePath = "C:\\Users\\lukin\\OneDrive\\Área de Trabalho\\planilha\\cliente.xlsx";
 		String username = "root"; /* JOptionPane.showInputDialog("Insira o Usuario do DB"); */
 		String password = "@soma+"; /* JOptionPane.showInputDialog("Insira a senha do DB"); */
-		String db = "db00"; /* JOptionPane.showInputDialog("Insira o banco que deseja fazer a Query"); */
+		String db = "db000"; /* JOptionPane.showInputDialog("Insira o banco que deseja fazer a Query"); */
 		String table = "client"; /* JOptionPane.showInputDialog("Insira a tabela"); */
-		String url = "jdbc:mysql://localhost:3306/db000";
+		String url = "jdbc:mysql://localhost:3306/" + db;
 		String defaultValue = "";
 		try (Connection connection = DriverManager.getConnection(url, username, password)) {
 			FileInputStream fileInputStream = new FileInputStream(filePath);
@@ -47,18 +50,22 @@ public class Main {
 			Sheet sheet = workbook.getSheetAt(0);
 			DataFormatter dataFormatter = new DataFormatter();
 			StringBuilder insertQuery = new StringBuilder("INSERT INTO " + table
-					+ " (name, type1, id_doc_number2, id_doc_number3, id_doc_number4, cell_phone, cell_phone2, gender, email");
-			StringBuilder valuePlaceholders = new StringBuilder(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?");
+					+ " (id,name,type1,id_doc_number2,id_doc_number3,id_doc_number4,cell_phone,cell_phone2,gender,email,birthday,register");
+			StringBuilder valuePlaceholders = new StringBuilder(" VALUES (?,?,?,?,?,?,?,?,?,?,?,?");
 			List<String> defaultValues = new ArrayList<>();
 			DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
 			ResultSet resultSet = metaData.getColumns(null, null, table, null);
-			int totalColumnsInDataBase = 9;
+			SimpleDateFormat inputDateFormat = new SimpleDateFormat("dd.MM.yyyy\\yyyy\\yyyy\\yyyy");
+			SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			int totalColumnsInDataBase = 13;
 			while (resultSet.next()) {
-				String columnName = resultSet.getString("COLUMN_NAME");
-				if (!columnName.equals("name") && !columnName.equals("type1") && !columnName.equals("id_doc_number2")
-						&& !columnName.equals("id_doc_number3") && !columnName.equals("id_doc_number4")
-						&& !columnName.equals("cell_phone") && !columnName.equals("cell_phone2")
-						&& !columnName.equals("gender") && !columnName.equals("email")) {
+				String columnName = resultSet.getString("COLUMN_NAME").toLowerCase();
+				if (!columnName.equals("id") && !columnName.equals("name") && !columnName.equals("type1")
+						&& !columnName.equals("id_doc_number2") && !columnName.equals("id_doc_number3")
+						&& !columnName.equals("id_doc_number4") && !columnName.equals("cell_phone")
+						&& !columnName.equals("cell_phone2") && !columnName.equals("gender")
+						&& !columnName.equals("email") && !columnName.equals("birthday")
+						&& !columnName.equals("register")) {
 					if (totalColumnsInDataBase > 0) {
 						insertQuery.append(",");
 						valuePlaceholders.append(",");
@@ -68,24 +75,52 @@ public class Main {
 					defaultValues.add(defaultValue);
 					totalColumnsInDataBase++;
 				}
+				if (columnName.equals("is_trainee")) {
+					break;
+				}
 			}
 			resultSet.close();
 			insertQuery.append(")");
 			valuePlaceholders.append(")");
 			insertQuery.append(valuePlaceholders);
+
+			Statement statement = connection.createStatement();
+			String alterTableQuery = "ALTER TABLE " + table;
+			String columnsQuery = "SHOW COLUMNS FROM " + table;
+			statement.execute(columnsQuery);
+			var result = statement.getResultSet();
+			while (result.next()) {
+				String columnNameString = result.getString("Field");
+				String columnType = result.getString("Type");
+				if (!columnNameString.equalsIgnoreCase("id")) {
+					String modifyColumnQuery = alterTableQuery + " MODIFY " + columnNameString + " " + columnType
+							+ " NULL";
+					statement.addBatch(modifyColumnQuery);
+				}
+			}
+			String alterTable = "ALTER TABLE client MODIFY COLUMN id_doc_number2 VARCHAR(50);";
+			statement.addBatch(alterTable);
+			statement.executeBatch();
 			int rowIndex;
 			int totalLinhasInseridas = 0;
 			for (rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
 				Row row = sheet.getRow(rowIndex);
-				Cell name = row.getCell(0);
-				Cell typeDoc = row.getCell(1);
-				Cell numberDoc = row.getCell(2);
-				Cell typeDoc1 = row.getCell(3);
-				Cell numberDoc1 = row.getCell(4);
-				Cell cell_phone = row.getCell(5);
-				Cell cell_phone2 = row.getCell(6);
-				Cell gender = row.getCell(7);
-				Cell email = row.getCell(8);
+				Cell id = row.getCell(0);
+				Cell name = row.getCell(1);
+				Cell typeDoc = row.getCell(2);
+				Cell numberDoc = row.getCell(3);
+				Cell typeDoc1 = row.getCell(4);
+				Cell numberDoc1 = row.getCell(5);
+				Cell cell_phone = row.getCell(6);
+				Cell cell_phone2 = row.getCell(7);
+				Cell gender = row.getCell(8);
+				Cell email = row.getCell(9);
+				Cell aniver = row.getCell(10);
+				Cell registro = row.getCell(11);
+
+				String idValue = dataFormatter.formatCellValue(id);
+				int idDouble = Integer.parseInt(idValue);
+
 				String nameValue = dataFormatter.formatCellValue(name);
 				String type1Value = dataFormatter.formatCellValue(typeDoc);
 				String numberDocValue = dataFormatter.formatCellValue(numberDoc);
@@ -95,42 +130,63 @@ public class Main {
 				String cell_phone2Value = dataFormatter.formatCellValue(cell_phone2);
 				String genderValue = dataFormatter.formatCellValue(gender);
 				String emailValue = dataFormatter.formatCellValue(email);
-				Integer typeResult;
-				  if (type1Value.equals("CPF")) { typeResult = 1;
+				String birthdayValue = dataFormatter.formatCellValue(aniver);
+				String registerValue = dataFormatter.formatCellValue(registro);
 
-				  } else { typeResult = 2;
-				  }
+				String yearValue = birthdayValue.substring(birthdayValue.lastIndexOf('\\') + 1);
+				int year = Integer.parseInt(yearValue);
+				Date birthdayDate = new Date(year - 1900, 0, 2);
+				String formattedBirthday = outputDateFormat.format(birthdayDate);
+
+				Date registerDate = new Date(year - 1900, 0, 2);
+				String formattedRegister = outputDateFormat.format(registerDate);
+				Integer typeResult;
+				if (type1Value.equals("CPF")) {
+					typeResult = 1;
+				} else {
+					typeResult = 2;
+				}
 				PreparedStatement preparedStatement = connection.prepareStatement(insertQuery.toString());
-				preparedStatement.setString(1, nameValue);
-				preparedStatement.setInt(2, typeResult);
-				preparedStatement.setString(3, numberDocValue);
-				preparedStatement.setString(4, typeDoc1Value);
-				preparedStatement.setString(5, numberDoc1Value);
-				preparedStatement.setString(6, cell_phoneValue);
-				preparedStatement.setString(7, cell_phone2Value);
-				preparedStatement.setInt(8, 1);
-				preparedStatement.setString(9, emailValue);
-			    for (int j = 0; j < defaultValues.size(); j++) {
-                    String value = defaultValues.get(j);
-                    if (value.isEmpty()) {
-                        preparedStatement.setInt(j + 10, 0);
-                    } else {
-                        preparedStatement.setString(j + 10, value);
-                    }
-                }
-			    //Inserir a data de nascimento
+				preparedStatement.setInt(1, idDouble);
+				preparedStatement.setString(2, nameValue);
+				preparedStatement.setInt(3, typeResult);
+				preparedStatement.setString(4, numberDocValue);
+				preparedStatement.setString(5, typeDoc1Value);
+				preparedStatement.setString(6, numberDoc1Value);
+				preparedStatement.setString(7, cell_phoneValue);
+				preparedStatement.setString(8, cell_phone2Value);
+				preparedStatement.setInt(9, 1);
+				preparedStatement.setString(10, emailValue);
+				preparedStatement.setString(11, formattedBirthday);
+				preparedStatement.setString(12, formattedRegister);
+				for (int j = 0; j < defaultValues.size(); j++) {
+					String value = defaultValues.get(j);
+					if (value.isEmpty()) {
+						preparedStatement.setNull(j + 13, java.sql.Types.NULL);
+					} else {
+						preparedStatement.setString(j + 13, "");
+					}
+				}
 				preparedStatement.execute();
 				preparedStatement.close();
-				System.out.println("TA FUNCIONANDO!!" + nameValue);
-				System.out.println("Olha aqui a porra do type " + type1Value);
-				System.out.println("CPF ou CNPJ " + numberDocValue);
-				System.out.println("RG ou IE " + numberDoc1Value);
-				System.out.println("Celular " + cell_phoneValue);
-				System.out.println("Segundo Celular " + cell_phone2Value);
-				System.out.println("Sexo " + genderValue);
-				System.out.println("Email " + emailValue);
-				System.out.println("----------------------------");
-
+				totalLinhasInseridas++;
+			}
+			ResultSet resultSet1 = metaData.getColumns(null, null, table, null);
+			statement.execute(columnsQuery);
+			while (resultSet1.next()) {
+				String columnNameString = resultSet1.getString("Field");
+				String columnType = resultSet1.getString("Type");
+				if (!columnNameString.equalsIgnoreCase("id")) {
+					String modifyColumnQuery = alterTableQuery + " MODIFY " + columnNameString + " " + columnType
+							+ " NOT NULL";
+					statement.addBatch(modifyColumnQuery);
+					System.out.println(modifyColumnQuery.toString());
+				}
+				statement.executeBatch();
+				statement.close();
+			}
+			System.out.println("Row affected = " + totalLinhasInseridas);
+			connection.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
